@@ -1,9 +1,9 @@
-{ stdenv, lib, autoreconfHook, ak-core, graphviz }:
+{ stdenv, lib, autoreconfHook, ak-core, graphviz, makeWrapper }:
 stdenv.mkDerivation {
   pname = "depgraph";
   version = "0.1.0";
   src = ./.;
-  nativeBuildInputs = [autoreconfHook];
+  nativeBuildInputs = [autoreconfHook makeWrapper];
   buildInputs = [graphviz];
   preFixup = ''
     for f in $( find $out/bin/ -type f -executable ); do
