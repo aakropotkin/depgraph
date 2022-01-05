@@ -2,7 +2,7 @@
 # -*- mode: sh; -*-
 # ============================================================================ #
 #
-# Version: 0.0.0
+# Version: 0.1.0
 #
 # Create a DOT dependency graph from a list of objects.
 #
