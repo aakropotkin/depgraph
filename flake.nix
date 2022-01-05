@@ -1,10 +1,10 @@
 {
   description = "A dependency graph visualizer.";
 
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  #inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.ak-core.url = "github:aakropotkin/ak-core";
 
-  outputs = { self, nixpkgs }: {
+  outputs = { self, nixpkgs, ak-core }: {
 
     overlays.depgraph = import ./overlay.nix;
     overlay = self.overlays.depgraph;
