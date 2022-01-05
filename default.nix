@@ -1,6 +1,29 @@
-{ stdenv, lib, autoreconfHook, ak-core, graphviz, makeWrapper }:
+{ stdenv
+, lib
+, autoreconfHook
+, makeWrapper
+, ak-core
+, graphviz
+, coreutils
+, gnused
+, gawk
+, findutils
+, diffutils
+, gnugrep
+, bash
+}:
 let
-  buildInputs = [graphviz ak-core];
+  buildInputs = [
+    ak-core
+    bash
+    coreutils
+    diffutils
+    findutils
+    gawk
+    gnugrep
+    gnused
+    graphviz
+  ];
 in stdenv.mkDerivation {
   pname = "depgraph";
   version = "0.1.0";
