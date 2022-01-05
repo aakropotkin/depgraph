@@ -1,1 +1,95 @@
 #! /usr/bin/env sh
+# -*- mode: sh; -*-
+# ============================================================================ #
+#
+# Version: 0.0.0
+#
+# Create a DOT dependency graph from a list of objects.
+#
+# USAGE: depgraph [-b] FILE... > OUTFILE
+# USAGE: depgraph -b foo.o bar.a libbaz.so > graph.dot
+#
+# OPTIONS:
+#   -b    Use object basenames in output
+#
+#
+# ---------------------------------------------------------------------------- #
+#
+# Graphs can be rendered using :
+#
+#   depgraph *.o|dot -Tpng FILE > OUTFILE.png;
+#   feh OUTFILE;
+#
+# Or a bit fancier :
+#   depgraph *.o|cluster|dot|edgepaint -angle=89|dot -Tpng > OUTFILE.png;
+#   feh OUTFILE;
+#
+# Post processing using things like `gvpr' makes these DOT files useful for a
+# variety of purposes - far beyond simply generating images.
+# But as a simple example you could use `gvpr' to add labels associated with the
+# resolution counts by doing :
+#
+#   depgraph *.o|gvpr -c 'E { label = weight }';
+#
+#
+# Just as a word of warning `gvpr' has incorrect examples for trivial uses in
+# its manpages, and its output for garbage inputs/flags often print garbage.
+# You almost always want to use the `-C' flag, and if you pass it a "script"
+# which doesn't do anything ( reference any graphs, edges, or nodes ) then
+# it just runs without outputting anything.
+#
+#
+# ---------------------------------------------------------------------------- #
+
+BASENAME=false;
+if test "${1}" = '-b'; then
+  shift;
+  BASENAME=true;
+fi
+
+function do_basename() {
+  if test "${BASENAME}" = true; then
+    cat -|sed 's: \([^ ]*/\)\?\([^/ ]\+\) \(.*/\)\?\([^/]\+\)$: \2 \4:';
+  else
+    cat -;
+  fi
+}
+
+
+# Counts the occurrences of edges output by `lorder'.
+# These counts are associated with the number of symbols which are resolved
+# by linking those objects.
+function count_resolutions() {
+  cat -|sort|uniq -c|sed 's/^ *//';
+}
+
+
+# Convert counted link pairs to DOT.
+# `lorder' outputs "self referential" edges because it has no other way to
+# express "nodes" which lack edges; which other scripts like `tsort' may need
+# to process.
+# We remove these lines, and then "flip" the `lorder' output from :
+# "CONSUMER PROVIDER" pairs to "PROVIDER -> CONSUMER" which is conventionally
+# the way we want arrows to point when representing linkage.
+function to_dot() {
+  cat -|awk '
+  BEGIN { print "digraph {"; }
+  {
+    if ( $2 != $3 ) {
+      print "  \"" $3 "\" -> \"" $2 "\" [weight=" $1 "];";
+    }
+  }
+  END { print "}"; }';
+}
+
+
+# Altogether now!
+lorder ${@}|count_resolutions|do_basename|to_dot;
+
+
+# ---------------------------------------------------------------------------- #
+
+
+
+# ============================================================================ #
+# vim: set filetype=sh :
